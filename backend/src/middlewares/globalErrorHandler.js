@@ -1,4 +1,5 @@
 import AuthError from "../errors/authError.js";
+import AccessError from "../errors/accessError.js";
 import ValidationError from "../errors/validationError.js";
 import logger from "../logger.js";
 
@@ -7,6 +8,11 @@ const globalErrorHandler = (err, req, res, next) => {
         var message = err.serializeError();
         logger.log('error', err.stack);
         return res.status(400).send(message);
+    }
+    if(err instanceof AccessError){
+        var message = err.serializeError();
+        logger.log('error', err.stack);
+        return res.status(401).send(message);
     }
     if(err instanceof AuthError){
         var message = err.serializeError();
