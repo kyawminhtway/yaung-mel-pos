@@ -13,7 +13,7 @@ const auth = async (req, res) => {
     var user = result.rows[0];
     var valid = await bcrypt.compare(password, user.password);
     if(!valid) throw new ValidationError('Invalid username or password!');
-    var csrfToken = crypto.createHmac('sha256', process.env.csrfTokenSecre)
+    var csrfToken = crypto.createHmac('sha256', process.env.csrfTokenSecret)
                     .update(`${uuidv4()}-${username}`)
                     .digest('hex');
     req.session.uid = user.id;

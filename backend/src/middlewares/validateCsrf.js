@@ -1,7 +1,12 @@
 import AccessError from "../errors/accessError.js";
 
+const HTTPMethodsToCheck = [
+    'POST',
+    'PATCH',
+    'DELETE',
+];
 const ValidateCSRF = (req, res, next) => {
-    if(req.method !== 'POST') return next();
+    if(!HTTPMethodsToCheck.includes(req.method)) return next();
     var headers = req.headers;
     var csrfToken = headers['x-xsrf-token'];
     if(!csrfToken) throw new AccessError('Missing CSRF token!');

@@ -2,6 +2,18 @@ import bcrypt from 'bcrypt';
 import ValidationError from '../../errors/validationError.js';
 
 const saltRounds = 10;
+const getAppUser = async (req, res) => {
+    var query = ` SELECT ID, NAME, USERNAME FROM APP_USER `;
+    var result = await req.env.pool.query(query);
+    res.send(result.rows);
+};
+
+const getAppUserByID = async (req, res) => {
+    var query = ` SELECT ID, NAME, USERNAME FROM APP_USER WHERE ID=${req.params.id} `;
+    var result = await req.env.pool.query(query);
+    res.send(result.rows);
+};
+
 const createAppUser = async (req, res) => {
     const { name, username, password } = req.body;
     if(!name || !username || !password) throw new ValidationError('Name, Username, Password should not be empty.');
@@ -19,7 +31,6 @@ const createAppUser = async (req, res) => {
 };
 
 const updateAppUser = async (req, res) => {
-    var record_id = parseInt(req.params.id);
     var cols = req.body;
     var query = [` UPDATE APP_USER SET `];
     var setStatement = [];
@@ -35,23 +46,21 @@ const updateAppUser = async (req, res) => {
     }
     query.push(setStatement.join(', '));
     query.push(` WHERE ID=$${paramsIndex} `);
-    params.push(record_id);
+    params.push(parseInt(req.params.id));
     await req.env.pool.query(query.join(' '), params);
     res.send({status: 'success'});
 };
 
-const getAppUser = async (req, res) => {
-    var query = ` SELECT ID, NAME, USERNAME FROM APP_USER WHERE 1=1 `;
-    const params = req.query;
-    if(params.id){
-        query += ` AND ID=${params.id} `;
-    }
-    var result = await req.env.pool.query(query);
-    res.send(result.rows);
+const deleteUser = async (req, res) => {
+    var result = await req.env.pool.query(` SELECT IS_ADMIN FROM APP_USER WHERE ID=${req.params.id} `);
+    await req.env.pool.query(` DELETE FROM APP_USER WHERE ID=$1 `, [req.params.id]);
+    res.send({status: 'success'});
 };
 
 export default {
+    getAppUser,
+    getAppUserByID,
     createAppUser,
     updateAppUser,
-    getAppUser,
+    deleteUser,
 };

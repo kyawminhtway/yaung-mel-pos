@@ -27,10 +27,19 @@ const app = express();
 app.use(helmet());
 
 // CORS
-app.use(cors({
+const whitelist = process.env.corsWhitelist.split(', ');
+const corsOptions = {
     credentials: true,
-    origin: 'http://localhost:3000'
-}));
+    origin: function (origin, callback) {
+        if (whitelist.includes(origin)) {
+            callback(null, true)
+        } else {
+            console.log('origin:', origin, 'not allowed')
+            callback(new Error('Not allowed by CORS'))
+        }
+    }
+}
+app.use(cors(corsOptions));
 
 // JSON
 app.use(express.json());
